@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import sgMail from '@sendgrid/mail'
 
 const initialData = {
   name: "",
@@ -7,7 +8,7 @@ const initialData = {
   births: "No",
   caesareans: "No",
   abortions: "No",
-  pregnancyWeeks: "0",
+  pregnancyWeeks: "12",
   pain: "No",
   objectives: "",
   contact: "",
@@ -150,6 +151,32 @@ const Stage2 = ({userInfo, handleChange}:{userInfo: initialData, handleChange: F
         </label>
       </div>
     </div>
+    <div className=" flex flex-col w-full items-start gap-1">
+      <span className="text-xs font-semibold uppercase my-1">
+        ¿Has tenido algun aborto?
+      </span>
+      <div
+         onChange={(e) => handleChange(e)}
+         className="flex justify-around w-full"
+      >
+        <label htmlFor="abortions-no">
+          <span className={`bg-opacity-40 border px-4 py-1 rounded ${userInfo.abortions === 'No' ? 'bg-indigo-500 border-indigo-200': 'bg-white border-white'}`}>No</span>
+          <input className="invisible w-0 h-0" id="abortions-no" type="radio" name="abortions" value="No"/>
+        </label>
+        <label htmlFor="abortions-1">
+          <span className={`bg-opacity-40 border px-4 py-1 rounded ${userInfo.abortions === '1' ? 'bg-indigo-500 border-indigo-200': 'bg-white border-white'}`}>1</span>
+          <input className="invisible w-0 h-0" id="abortions-1" type="radio" name="abortions" value="1" />
+        </label>
+        <label htmlFor="abortions-2">
+          <span className={`bg-opacity-40 border px-4 py-1 rounded ${userInfo.abortions === '2' ? 'bg-indigo-500 border-indigo-200': 'bg-white border-white'}`}>2</span>
+          <input className="invisible w-0 h-0" id="abortions-2" type="radio" name="abortions" value="2" />
+        </label>
+        <label htmlFor="abortions-3">
+          <span className={`bg-opacity-40 border px-4 py-1 rounded ${userInfo.abortions === '3+' ? 'bg-indigo-500 border-indigo-200': 'bg-white border-white'}`}>3+</span>
+          <input className="invisible w-0 h-0" id="abortions-3" type="radio" name="abortions" value="3+" />
+        </label>
+      </div>
+    </div>
   </>
 );
 
@@ -196,6 +223,7 @@ const FormOverlay = ({ onClose }: { onClose: Function }): JSX.Element => {
   const [userInfo, userInfoSet] = useState(initialData);
   const [stage, stageSet] = useState(1);
   const [errors, errorsSet] = useState('');
+  const [contact, contactSet] = useState('');
   const handleChange = (e: { target: { name: keyof typeof userInfo; value: string; }; }) => {
     const newState = {...userInfo}
     newState[e.target.name] = e.target.value;
@@ -216,6 +244,49 @@ const FormOverlay = ({ onClose }: { onClose: Function }): JSX.Element => {
     }
     
   };
+  const handleSubmit = (e:any) => {
+    e.preventDefault();
+    fetch('https://promom-back.vercel.app/api/mail', {
+      method: 'POST', 
+      mode: 'cors', 
+      cache: 'no-cache', 
+      credentials: 'same-origin', 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      redirect: 'follow', 
+      referrerPolicy: 'no-referrer', 
+      body: JSON.stringify(userInfo) 
+    }).then((res) => {
+      console.log(res.status)
+      contactSet('success')
+    }).catch((error) => {
+      console.log(error)
+      contactSet('fail')
+    })
+   }
+
+   
+   if(contact === 'fail') return (
+    <div className="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center">
+      <div className="w-10/12 md:w-1/2 xl:w-1/4 rounded-xl border-2 bg-indigo-100 bg-opacity-30 backdrop-blur-sm border-violet-200 px-8 pt-4 pb-24 relative">
+        <h1 className="text-stone-900 text-2xl font-semibold text-center my-4">
+          Contacto Promom
+        </h1>
+        <p className="font-semibold text-lg">Algo ha salido mal, por favor contactanos al emal: aurora250197@gmail.com </p>
+      </div>
+      </div>
+   )
+   if(contact === 'sucess') return (
+    <div className="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center">
+      <div className="w-10/12 md:w-1/2 xl:w-1/4 rounded-xl border-2 bg-indigo-100 bg-opacity-30 backdrop-blur-sm border-violet-200 px-8 pt-4 pb-24 relative">
+        <h1 className="text-stone-900 text-2xl font-semibold text-center my-4">
+          Contacto Promom
+        </h1>
+        <p className="font-semibold text-lg">Gracias por Contactarnos, vamos a contactarte mediante WhatsApp pronto! </p>
+      </div>
+      </div>
+   )
 
   return (
     <div className="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center">
@@ -223,7 +294,7 @@ const FormOverlay = ({ onClose }: { onClose: Function }): JSX.Element => {
         <h1 className="text-stone-900 text-2xl font-semibold text-center my-4">
           Contacto Promom
         </h1>
-        <form ref={formy} action="POST" className="flex flex-col w-full items-start gap-8 pb-20">
+        <form ref={formy} onSubmit={(e) => handleSubmit(e)} action="POST" className="flex flex-col w-full items-start gap-8 pb-20">
           {stage === 1 && <Stage1 handleChange={handleChange} />}
           {stage === 2 && <Stage2 userInfo={userInfo} handleChange={handleChange} />}
           {stage === 3 && <Stage3 userInfo={userInfo} handleChange={handleChange} />}
