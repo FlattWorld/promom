@@ -192,11 +192,11 @@ const Stage3 = ({userInfo, handleChange}:{userInfo: initialData, handleChange: F
 
 
 const FormOverlay = ({ onClose }: { onClose: Function }): JSX.Element => {
-  const formy = useRef(null);
+  const formy:any = useRef(null);
   const [userInfo, userInfoSet] = useState(initialData);
   const [stage, stageSet] = useState(1);
   const [errors, errorsSet] = useState('');
-  const handleChange = (e:any) => {
+  const handleChange = (e: { target: { name: keyof typeof userInfo; value: string; }; }) => {
     const newState = {...userInfo}
     newState[e.target.name] = e.target.value;
     userInfoSet(newState)
