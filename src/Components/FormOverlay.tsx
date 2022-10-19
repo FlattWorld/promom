@@ -277,7 +277,7 @@ const FormOverlay = ({ onClose }: { onClose: Function }): JSX.Element => {
       </div>
       </div>
    )
-   if(contact === 'sucess') return (
+   if(contact === 'success') return (
     <div className="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center">
       <div className="w-10/12 md:w-1/2 xl:w-1/4 rounded-xl border-2 bg-indigo-100 bg-opacity-30 backdrop-blur-sm border-violet-200 px-8 pt-4 pb-24 relative">
         <h1 className="text-stone-900 text-2xl font-semibold text-center my-4">
